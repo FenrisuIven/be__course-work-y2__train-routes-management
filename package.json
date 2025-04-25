@@ -1,0 +1,25 @@
+{
+  "name": "server__train-routes-management",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "scripts": {
+    "dev": "npx tsx main.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.15.2",
+    "@types/sequelize": "^4.28.20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "pg": "^8.15.5",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7",
+    "tsx": "^4.19.3"
+  }
+}
