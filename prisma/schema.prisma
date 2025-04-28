@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ArrivalTimes {
+  id                 Int           @id(map: "ArrivalTime_pkey") @default(autoincrement())
+  trackerID          Int           @unique
+  arrivalTime        DateTime      @db.Timestamptz(6)
+  currentStopID      Int           @unique
+  nextStopID         Int           @unique
+
+  NextStop           TrainStops    @relation("AT-Stops__NextStop",fields: [nextStopID], references: [id])
+  CurrentStop        TrainStops    @relation("AT-Stops__CurrentStop", fields: [currentStopID], references: [id])
+  Tracker            Trackers      @relation(fields: [trackerID], references: [id])
+}
+
+model Routes {
+  id            Int               @id @default(autoincrement())
+  name          String
+  stops         TrainStops[]
+  voyage        Voyages?
+}
+
+model Trackers {
+  id       Int      @id @default(autoincrement())
+  serial   String
+  trainID  Int?
+  Train    Trains?
+  AT       ArrivalTimes?
+}
+
+model TrainStations {
+  id               Int          @id @default(autoincrement())
+  name             String
+  city             String
+  region           String
+  street           String
+  trainStopID      Int          @unique
+  routeID          Int?
+  trainStop        TrainStops   @relation(fields: [trainStopID], references: [id])
+}
+
+model TrainStops {
+  id               Int             @id @default(autoincrement())
+  name             String
+  lon              String
+  lat              String
+  routes           Routes[]
+  AT_NextStop      ArrivalTimes?   @relation("AT-Stops__NextStop")
+  AT_CurrentStop   ArrivalTimes?   @relation("AT-Stops__CurrentStop")
+  trainStation     TrainStations?
+}
+
+model Trains {
+  id             Int            @id @default(autoincrement())
+  name           String
+  voyageID       Int
+  trackerID      Int?           @unique
+  active         Boolean
+  Tracker        Trackers?      @relation(fields: [trackerID], references: [id])
+  Voyage         Voyages        @relation(fields: [voyageID], references: [id])
+}
+
+model Voyages {
+  id             Int           @id @default(autoincrement())
+  name           String
+  routeID        Int?          @unique
+  trains         Trains[]
+  route          Routes?       @relation(fields: [routeID], references: [id])
+}

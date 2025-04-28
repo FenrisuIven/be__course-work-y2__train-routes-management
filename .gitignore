@@ -1,0 +1,11 @@
+# Dependencies
+node_modules
+.idea
+
+# Local env files
+*.env*
+
+# Prisma
+prisma/generated
+prisma/migrations
+prisma/ERD.svg
