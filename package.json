@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.ts",
+  "type": "module",
   "scripts": {
     "dev": "npx tsx main.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "generate": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.4.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
     "@types/node": "^22.15.2",
     "prisma": "^6.6.0",
     "prisma-erd-generator": "^2.0.4"
