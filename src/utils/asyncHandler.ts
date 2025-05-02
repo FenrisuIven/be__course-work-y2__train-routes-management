@@ -1,8 +1,8 @@
 import {RequestHandler} from 'express';
 
-type a = (...args: Parameters<RequestHandler>) => Promise<void> | void;
+type asyncHandlerProps = (...args: Parameters<RequestHandler>) => Promise<void> | void;
 
-const asyncHandler = (func: a): RequestHandler => (
+const asyncHandler = (func: asyncHandlerProps): RequestHandler => (
   req, res, next
 ) => {
   Promise.resolve(func(req, res, next))
