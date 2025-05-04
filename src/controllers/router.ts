@@ -1,10 +1,9 @@
 import { Router } from 'express';
 
-import trainRoutes from '../routes/train/trainRoutes';
-import asyncHandler from "../utils/asyncHandler";
+import trainRouter from "./train";
 
 const router = Router();
 
-router.get('/train', asyncHandler(trainRoutes.getAll))
+router.use('/train', trainRouter);
 
 export default router;

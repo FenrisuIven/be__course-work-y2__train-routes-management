@@ -1,9 +1,9 @@
-import {Request, Response} from "express";
-import prismaClient from "../../setup/orm/prisma";
+import {NextFunction, Request, Response} from "express";
+import prismaClient from "../../../setup/orm/prisma";
 
 import type {Train, Tracker} from "@prisma/client";
 
-const getAll = async (req: Request, res: Response) => {
+const getAll = async (req: Request, res: Response, next: NextFunction) => {
   const trains: (
     Train &
     { tracker: Tracker}
@@ -23,6 +23,6 @@ const getAll = async (req: Request, res: Response) => {
   res.status(responseData.length > 0 ? 200 : 404).json(responseData);
 }
 
-export default {
+export {
   getAll
 };
