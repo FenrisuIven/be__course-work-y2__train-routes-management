@@ -11,9 +11,11 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
     };
   }
 
+  const remap = req.query.remap === "" && Object.keys(include).length > 0;
+
   let responseData = [];
   if (Object.keys(include).length > 0) {
-    responseData = await TrainModel.GET_ALL_WITH_INCLUDED({include});
+    responseData = await TrainModel.GET_ALL_WITH_INCLUDED({include, remap});
   } else {
     responseData = await TrainModel.GET_ALL();
   }
