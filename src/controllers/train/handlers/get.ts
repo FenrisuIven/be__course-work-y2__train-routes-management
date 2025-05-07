@@ -1,25 +1,22 @@
 import {NextFunction, Request, Response} from "express";
-import prismaClient from "../../../setup/orm/prisma";
 
-import type {Train, Tracker} from "@prisma/client";
+import TrainModel from "../../../models/train";
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
-  const trains: (
-    Train &
-    { tracker: Tracker}
-    )[] = await prismaClient.train.findMany({
-    include:{
-      tracker: true
-    }
-  })
+  let include = {};
+  if (req.query.include || Array.isArray(req.query.include)) {
+    include = {
+      voyage: (req.query.include as string[]).includes("voyage"),
+      tracker: (req.query.include as string[]).includes("tracker"),
+    };
+  }
 
-  const responseData: TrainWithTracker[] = trains.map((
-    row: Train & { tracker: Tracker }
-  ): TrainWithTracker => {
-    const {tracker, ...train} = row;
-    return {...train, trackerID: tracker.id, trackerSerial: tracker.serial};
-  });
-
+  let responseData = [];
+  if (Object.keys(include).length > 0) {
+    responseData = await TrainModel.GET_ALL_WITH_INCLUDED({include});
+  } else {
+    responseData = await TrainModel.GET_ALL();
+  }
   res.status(responseData.length > 0 ? 200 : 404).json(responseData);
 }
 
