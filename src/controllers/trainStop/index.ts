@@ -1,3 +1,5 @@
+export * from './trainStopRouter'
+
 // retrieve train stops with their positions in world
 // await prismaClient.$queryRaw`SELECT "name", "stationID", "position"::text FROM "TrainStop"`;
 
