@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import trainRouter from "./train";
+import { trainRouter } from "./train";
 
 const router = Router();
 

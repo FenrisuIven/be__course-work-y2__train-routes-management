@@ -1,12 +1,6 @@
-type TrainWithTrackerAndVoyage = Train & Tracker & Voyage;
+import {Train} from "@prisma/client";
 
-type Train = {
-  id: number;
-  name: string;
-  trackerID: number
-  voyageID: number | null;
-  active: boolean;
-};
+export type TrainWithTrackerAndVoyage = Train & Tracker & Voyage;
 
 type Tracker = {
   trackerSerial: string | null;
