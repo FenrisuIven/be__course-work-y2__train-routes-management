@@ -3,7 +3,7 @@ import type {Train, Voyage, Tracker, TrainStop} from "@prisma/client";
 
 import {NewTrainRequiredFields, TrainWithTrackerAndVoyage} from "./types";
 import Repository from "../../classes/Repository";
-import {resolveError} from "../../utils/requests/resolveError";
+import {PrismaClientKnownRequestError} from "../../../prisma/generated/runtime/library";
 
 type TrainWithIncludes = Train & {
   voyage: Voyage | null;
@@ -33,23 +33,20 @@ class TrainRepository extends Repository{
     let createData = {
       name: data.name,
       active: data.active,
-      voyage: undefined,
+      voyage: data.voyageID && { connect: { id: data.voyageID } },
       tracker: data.trackerSerial && { create: { serial: data.trackerSerial } }
     };
 
-    const trackerPresent = await prismaClient.tracker.findFirst({where: { serial: data.trackerSerial }, include: { train: true }});
-    if (trackerPresent) {
-      return resolveError(400, { msg: `Tracker with serial ${data.trackerSerial} is already present` });
-    }
-    const voyagePresent = await prismaClient.voyage.findFirst({where: { id: data.voyageID }});
-    if (voyagePresent) {
-      createData = {
-        ...createData,
-        voyage: data.voyageID && { connect: { id: data.voyageID } }
-      };
+    try {
+      const row = await prismaClient.train.create({ data: createData });
+      return {status: 200, data: row};
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        return {status: 400, data: { code: e.code, message: e.meta?.cause } };
+      }
     }
 
-    return prismaClient.train.create({ data: createData });
+    return ;
   }
 
   public static mapToDestructed(targetObject: TrainWithIncludes): TrainWithTrackerAndVoyage {

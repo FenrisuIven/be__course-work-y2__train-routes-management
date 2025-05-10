@@ -6,6 +6,7 @@ import {checkRequiredFieldsPresent} from "../../../utils/validation/isRequiredFi
 import { repositories } from '../../../repositories';
 
 const postNew = (req: Request) => {
+  console.log(req)
   const missingFields = checkRequiredFieldsPresent(NewTrainRequiredFields, req.body)
   if (missingFields.length > 0) {
     return resolveError(400, { msg: `Missing required fields: ${missingFields}` });
