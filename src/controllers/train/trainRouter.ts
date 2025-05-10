@@ -7,7 +7,7 @@ import {handleRequest} from "../../utils/requests/handleRequest";
 
 const trainRouter = Router();
 
-trainRouter.get('/', resolveRequest((req: Request, res: Response) => handleRequestWithIncludes(req, res, trainController.getAll)));
+trainRouter.get('/', resolveRequest(handleRequestWithIncludes(trainController.getAll)));
 
 trainRouter.post('/new', resolveRequest((req: Request, res: Response) => handleRequest(req, res, () => trainController.postNew(req.body))))
 

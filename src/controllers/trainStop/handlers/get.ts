@@ -1,4 +1,4 @@
-import { TrainStopModel } from "../../../models/trainStop";
+import { TrainStopModel } from "../../../repositories/trainStop";
 
 const getAll = async (include: Record<string, boolean>, remap: boolean) => {
   const trainStopModel = new TrainStopModel();

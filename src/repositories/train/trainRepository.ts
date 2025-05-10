@@ -2,8 +2,7 @@ import prismaClient from "../../setup/orm/prisma";
 import type {Train, Voyage, Tracker, TrainStop} from "@prisma/client";
 
 import {NewTrainRequiredFields, TrainWithTrackerAndVoyage} from "./types";
-import Model from "../../classes/Model";
-import prisma from "../../setup/orm/prisma";
+import Repository from "../../classes/Repository";
 import {resolveError} from "../../utils/requests/resolveError";
 
 type TrainWithIncludes = Train & {
@@ -11,7 +10,7 @@ type TrainWithIncludes = Train & {
   tracker: Tracker | null;
 }
 
-class TrainModel extends Model{
+class TrainRepository extends Repository{
   public async GET_ALL(): Promise<Train[]> {
     return prismaClient.train.findMany();
   }
@@ -25,7 +24,7 @@ class TrainModel extends Model{
     const trains: TrainWithIncludes[] = await prismaClient.train.findMany({ include });
 
     if (remap) {
-      return trains.map(row => TrainModel.mapToDestructed(row));
+      return trains.map(row => TrainRepository.mapToDestructed(row));
     }
     return trains;
   }
@@ -68,4 +67,4 @@ class TrainModel extends Model{
   }
 }
 
-export { TrainModel };
+export { TrainRepository };

@@ -1,13 +1,13 @@
 import prismaClient from "../../setup/orm/prisma";
 import type {TrainStop, Station, Route} from "@prisma/client";
-import Model from "../../classes/Model";
+import Repository from "../../classes/Repository";
 
 type TrainStopWithIncludes = TrainStop & {
   station: Station | null;
   routes: Route[] | null;
 }
 
-class TrainStopModel extends Model{
+class TrainStopModel extends Repository{
   public async GET_ALL(){
     return prismaClient.trainStop.findMany();
   }

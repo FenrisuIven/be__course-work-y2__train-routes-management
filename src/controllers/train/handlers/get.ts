@@ -1,11 +1,10 @@
-import { TrainModel } from "../../../models/train";
+import { repositories } from "../../../repositories";
 
 const getAll = (include: Record<string, boolean>, remap: boolean) => {
-  const trainModel = new TrainModel();
   if (Object.keys(include).length > 0) {
-    return trainModel.GET_ALL_WITH_INCLUDED({ include, remap });
+    return repositories.TrainRepository.GET_ALL_WITH_INCLUDED({ include, remap });
   }
-  return trainModel.GET_ALL();
+  return repositories.TrainRepository.GET_ALL();
 }
 
 export {
