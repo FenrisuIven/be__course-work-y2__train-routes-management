@@ -5,9 +5,12 @@ const handleRequestWithIncludes = async (
   res: Response,
   callback: (include: Record<string, boolean>, remap: boolean) => Promise<any[]>
 ) => {
-  const include = [req.query.include as string[]].flat().reduce<Record<string, boolean>>((acc, value) => {
-    return {...acc, [value]: true};
-  }, {});
+  let include = {};
+  if (req.query.include) {
+    include = [req.query.include as string[]].flat().reduce<Record<string, boolean>>((acc, value) => {
+      return {...acc, [value]: true};
+    }, {});
+  }
 
   const remap = req.query.remap === "" && Object.keys(include).length > 0;
   const responseData = await callback(include, remap);
