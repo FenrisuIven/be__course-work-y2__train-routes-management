@@ -7,10 +7,10 @@ export const NewTrainRequiredFields = [
 ] as const;
 
 type Tracker = {
-  trackerSerial: string | null;
+  trackerSerial?: string | null;
 }
 
 type Voyage = {
-  voyageName: string | null;
-  voyageRouteID: number | null;
+  voyageName?: string | null;
+  voyageRouteID?: number | null;
 }

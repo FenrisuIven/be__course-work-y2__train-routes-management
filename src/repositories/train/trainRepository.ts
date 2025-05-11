@@ -30,12 +30,24 @@ class TrainRepository extends Repository{
   }
 
   public async POST_CREATE_ONE(data: Record<typeof NewTrainRequiredFields[number], any>){
-    let createData = {
+    let createData: {
+      name: string;
+      active: boolean;
+      tracker: {};
+      voyage?: {};
+    } = {
       name: data.name,
-      active: data.active,
-      voyage: data.voyageID && { connect: { id: data.voyageID } },
+      active: Boolean(data.active),
       tracker: data.trackerSerial && { create: { serial: data.trackerSerial } }
     };
+
+    const voyageExists = await prismaClient.voyage.findFirst({where: {id: Number(data.voyageID)}});
+    if (voyageExists) {
+      createData = {
+        ...createData,
+        voyage: { connect: { id: Number(data.voyageID) } }
+      };
+    }
 
     try {
       const row = await prismaClient.train.create({ data: createData });
@@ -45,8 +57,6 @@ class TrainRepository extends Repository{
         return {status: 400, data: { code: e.code, message: e.meta?.cause } };
       }
     }
-
-    return ;
   }
 
   public static mapToDestructed(targetObject: TrainWithIncludes, requested: string[]): TrainWithTrackerAndVoyage {
@@ -56,7 +66,7 @@ class TrainRepository extends Repository{
       ...train
     } = targetObject;
 
-    let remapedObj = {...train};
+    let remapedObj: TrainWithTrackerAndVoyage = {...train};
 
     if (tracker || requested.includes("tracker")) {
       remapedObj = {
