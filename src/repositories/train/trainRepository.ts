@@ -14,19 +14,19 @@ class TrainRepository extends Repository{
   public async GET_ALL(): Promise<Train[]> {
     return prismaClient.train.findMany();
   }
-  public async GET_ALL_WITH_INCLUDED({ include, remap }: {
+  public async GET_ALL_WITH_INCLUDED({ include, noremap }: {
     include: {
       voyage?: boolean,
       tracker?: boolean
     },
-    remap?: boolean
+    noremap?: boolean
   }): Promise<TrainWithIncludes[] | TrainWithTrackerAndVoyage[]> {
     const trains: TrainWithIncludes[] = await prismaClient.train.findMany({ include });
 
-    if (remap) {
-      return trains.map(row => TrainRepository.mapToDestructed(row));
+    if (noremap) {
+      return trains;
     }
-    return trains;
+    return trains.map(row => TrainRepository.mapToDestructed(row, Object.keys(include)));
   }
 
   public async POST_CREATE_ONE(data: Record<typeof NewTrainRequiredFields[number], any>){
@@ -49,18 +49,31 @@ class TrainRepository extends Repository{
     return ;
   }
 
-  public static mapToDestructed(targetObject: TrainWithIncludes): TrainWithTrackerAndVoyage {
+  public static mapToDestructed(targetObject: TrainWithIncludes, requested: string[]): TrainWithTrackerAndVoyage {
     const {
       voyage,
       tracker,
       ...train
     } = targetObject;
 
-    return {...train,
-      trackerSerial: tracker?.serial || null,
-      voyageName: voyage?.name || null,
-      voyageRouteID: voyage?.routeID || null
-    };
+    let remapedObj = {...train};
+
+    if (tracker || requested.includes("tracker")) {
+      remapedObj = {
+        ...remapedObj,
+        trackerSerial: tracker?.serial || null
+      };
+    }
+
+    if (voyage || requested.includes("voyage")) {
+      remapedObj = {
+        ...remapedObj,
+        voyageName: voyage?.name || null,
+        voyageRouteID: voyage?.routeID || null
+      };
+    }
+
+    return remapedObj;
   }
 }
 

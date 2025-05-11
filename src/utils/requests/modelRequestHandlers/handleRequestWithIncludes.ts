@@ -1,7 +1,7 @@
 import {RequestHandler} from "express";
 
 const handleRequestWithIncludes = (
-  callback: (include: Record<string, boolean>, remap: boolean) => Promise<any[]>
+  callback: (include: Record<string, boolean>, noremap: boolean) => Promise<any[]>
 ): RequestHandler => {
   return async (req, res) => {
     let include = {};
@@ -11,8 +11,8 @@ const handleRequestWithIncludes = (
       }, {});
     }
 
-    const remap = req.query.remap === "" && Object.keys(include).length > 0;
-    const responseData = await callback(include, remap);
+    const noremap = req.query.noremap === "";
+    const responseData = await callback(include, noremap);
 
     res.status(responseData.length > 0 ? 200 : 204).json(responseData);
   }
