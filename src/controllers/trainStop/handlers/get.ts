@@ -1,11 +1,10 @@
-import { TrainStopModel } from "../../../repositories/trainStop";
+import {repositories} from '../../../repositories';
 
-const getAll = async (include: Record<string, boolean>, remap: boolean) => {
-  const trainStopModel = new TrainStopModel();
+const getAll = async (include: Record<string, boolean>, noremap: boolean) => {
   if (!Object.keys(include).length) {
-    return trainStopModel.GET_ALL_WITH_INCLUDED({ include, remap });
+    return repositories.TrainStopRepository.GET_ALL_WITH_INCLUDED({ include, noremap });
   }
-  return trainStopModel.GET_ALL();
+  return repositories.TrainStopRepository.GET_ALL();
 }
 
 export {

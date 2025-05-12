@@ -1,1 +1,1 @@
-export * from './trainStopModel'
+export * from './trainStopRepository'

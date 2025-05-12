@@ -4,6 +4,7 @@ abstract class Repository {
     include: Record<string, boolean>;
     noremap?: boolean;
   }): Promise<any[]>;
+  abstract POST_CREATE_ONE(data: Record<any, any>): Promise<any>;
 }
 
 export default Repository;
