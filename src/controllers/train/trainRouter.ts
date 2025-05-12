@@ -9,6 +9,6 @@ const trainRouter = Router();
 
 trainRouter.get('/', resolveRequest(handleRequestWithIncludes(trainController.getAll)));
 
-trainRouter.post('/new', resolveRequest((req: Request, res: Response) => handleRequest(req, res, () => trainController.postNew(req))))
+trainRouter.post('/new', resolveRequest(handleRequest(trainController.postNew)))
 
 export { trainRouter };
