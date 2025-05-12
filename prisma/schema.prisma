@@ -19,6 +19,7 @@ model Voyage {
 
   trains  Train[]
   route   Route   @relation(fields: [routeID], references: [id])
+  schedule Schedule[]
 }
 
 model Route {
@@ -37,6 +38,7 @@ model TrainStop {
 
   station   Station @relation(fields: [stationID], references: [id])
   routes    Route[] @relation("RouteToTrainStop")
+  schedule  Schedule[]
 
   @@index([position], name: "position_idx", type: Gist)
 }
@@ -60,6 +62,7 @@ model Train {
 
   voyage    Voyage? @relation(fields: [voyageID], references: [id])
   tracker   Tracker @relation(fields: [trackerID], references: [id])
+  schedule  Schedule[]
 }
 
 model Tracker {
@@ -67,4 +70,16 @@ model Tracker {
   serial String
 
   train  Train?
+}
+
+model Schedule {
+  id       Int @id @default(autoincrement())
+  voyageID Int
+  trainID  Int
+  stopID   Int
+  date     DateTime
+
+  voyage   Voyage    @relation(fields: [voyageID], references: [id])
+  train    Train     @relation(fields: [trainID], references: [id])
+  stop     TrainStop @relation(fields: [stopID], references: [id])
 }
