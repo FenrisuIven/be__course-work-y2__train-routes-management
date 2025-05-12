@@ -33,7 +33,7 @@ model Route {
 model TrainStop {
   id        Int     @id @default(autoincrement())
   name      String
-  stationID Int
+  stationID Int     @unique
   position  Unsupported("geography")?
 
   station   Station @relation(fields: [stationID], references: [id])
@@ -50,7 +50,7 @@ model Station {
   region  String
   street  String
 
-  stops   TrainStop[]
+  stop    TrainStop?
 }
 
 model Train {
