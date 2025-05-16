@@ -9,3 +9,4 @@ node_modules
 prisma/generated
 prisma/migrations
 prisma/ERD.svg
+/TODO.md
