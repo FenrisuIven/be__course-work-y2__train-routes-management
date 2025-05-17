@@ -2,6 +2,7 @@ import Repository from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {PrismaClientKnownRequestError, PrismaClientValidationError} from "../../../prisma/generated/runtime/library";
 import {resolveError} from "../../utils/requests/resolveError";
+import {resolveSuccess} from "../../utils/requests/resolveSuccess";
 
 class ScheduleRepository extends Repository {
   public async GET_ALL(): Promise<any[]> {
@@ -36,7 +37,7 @@ class ScheduleRepository extends Repository {
 
     try {
       const row = await prismaClient.schedule.create({ data: createData });
-      return { status: 201, data: row };
+      return resolveSuccess(row, 201);
     }
     catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
