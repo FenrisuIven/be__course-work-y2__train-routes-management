@@ -2,7 +2,7 @@ import prismaClient from "../../setup/orm/prisma";
 import type {Train, Voyage, Tracker} from "@prisma/client";
 
 import {NewTrainRequiredFields, TrainWithTrackerAndVoyage} from "./types";
-import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
+import Repository from "../../classes/Repository";
 import {PrismaClientKnownRequestError} from "../../../prisma/generated/runtime/library";
 import {SelectManyHandler} from "../types/selectManyHandler";
 import {ResponseMessage} from "../../types/responseMessage";
@@ -15,14 +15,14 @@ type TrainWithIncludes = Train & {
 }
 
 class TrainRepository extends Repository{
-  public async GET_ALL(): Promise<SuccessResponseData | ErrorResponseData> {
+  public async GET_ALL() {
     try {
       const responseData = await prismaClient.train.findMany();
       const count = await prismaClient.train.count();
-      return { data: responseData, count };
+      return getSuccess({rows: responseData, count});
     }
     catch (e) {
-      return {error: true, data: e, status: 500}
+      return getError(e as any)
     }
   }
   public async GET_ALL_WITH_INCLUDED({ include, noremap, skip, take }: {
@@ -30,19 +30,19 @@ class TrainRepository extends Repository{
       voyage?: boolean,
       tracker?: boolean
     }} & SelectManyHandler
-  ): Promise<SuccessResponseData | ErrorResponseData> {
+  ) {
     try {
-      const schedule = await prismaClient.train.findMany({ include, skip, take });
+      const trains = await prismaClient.train.findMany({ include, skip, take });
       const count = await prismaClient.train.count();
 
       if (noremap) {
-        return { data: schedule, count };
+        return getSuccess({rows: trains, count});
       }
-      const remapped = schedule.map(row => TrainRepository.mapToDestructed(row, Object.keys(include)));
-      return { data: remapped, count };
+      const remapped = trains.map(row => TrainRepository.mapToDestructed(row, Object.keys(include)));
+      return getSuccess({rows: remapped, count});
     }
     catch (e) {
-      return {error: true, data: e, status: 500}
+      return getError(e as any)
     }
   }
 
