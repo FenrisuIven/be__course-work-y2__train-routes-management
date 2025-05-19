@@ -12,7 +12,7 @@ const getAll = async (params: GetAllPayload, repository: Repository): Promise<Re
   if (params.include && Object.keys(params.include)?.length > 0) {
     responseData = await repository.GET_ALL_WITH_INCLUDED(params)
   } else {
-    responseData = await repository.GET_ALL();
+    responseData = await repository.GET_ALL(params);
   }
 
   if ("error" in responseData){

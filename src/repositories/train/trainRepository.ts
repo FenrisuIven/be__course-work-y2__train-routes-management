@@ -15,10 +15,13 @@ type TrainWithIncludes = Train & {
 }
 
 class TrainRepository extends Repository{
-  public async GET_ALL() {
+  public async GET_ALL({ skip, take } : {
+    skip?:number,
+    take?:number
+  }) {
     try {
-      const responseData = await prismaClient.train.findMany();
       const count = await prismaClient.train.count();
+      const responseData = await prismaClient.train.findMany({skip: skip || 0, take: take || count});
       return getSuccess({rows: responseData, count});
     }
     catch (e) {
@@ -32,6 +35,7 @@ class TrainRepository extends Repository{
     }} & SelectManyHandler
   ) {
     try {
+      console.log({skip, take})
       const trains = await prismaClient.train.findMany({ include, skip, take });
       const count = await prismaClient.train.count();
 

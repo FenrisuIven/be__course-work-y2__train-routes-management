@@ -1,6 +1,6 @@
 import prismaClient from "../../setup/orm/prisma";
 import type {TrainStop, Station, Route} from "@prisma/client";
-import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
+import Repository from "../../classes/Repository";
 import {TrainStopWithStationAndRoute} from "./types";
 import {getSuccess} from "../../utils/responses/getSuccess";
 import {getError} from "../../utils/responses/getError";
@@ -13,10 +13,13 @@ type TrainStopWithIncludes = TrainStop & {
 }
 
 class TrainStopRepository extends Repository{
-  public async GET_ALL(): Promise<SuccessResponseData | ErrorResponseData> {
+  public async GET_ALL({ skip, take } : {
+    skip?:number,
+    take?:number
+  }) {
     try {
-      const responseData = await prismaClient.trainStop.findMany();
       const count = await prismaClient.trainStop.count();
+      const responseData = await prismaClient.trainStop.findMany({skip: skip || 0, take: take || count});
       return getSuccess({rows: responseData, count});
     }
     catch (e) {
@@ -27,7 +30,7 @@ class TrainStopRepository extends Repository{
     include: {
       station?: boolean,
       routes?: boolean
-    }} & SelectManyHandler): Promise<SuccessResponseData | ErrorResponseData> {
+    }} & SelectManyHandler) {
     try {
       const stops = await prismaClient.trainStop.findMany({ include, skip, take });
       const count = await prismaClient.trainStop.count();

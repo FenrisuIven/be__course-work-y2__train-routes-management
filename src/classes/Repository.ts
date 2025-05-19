@@ -1,7 +1,10 @@
 import {ResponseMessage} from "../types/responseMessage";
 
 abstract class Repository {
-  abstract GET_ALL(): Promise<ResponseMessage>;
+  abstract GET_ALL(params: {
+    skip?:number,
+    take?:number
+  }): Promise<ResponseMessage>;
   abstract GET_ALL_WITH_INCLUDED(params: {
     include?: Record<string, boolean>;
     skip?: number;

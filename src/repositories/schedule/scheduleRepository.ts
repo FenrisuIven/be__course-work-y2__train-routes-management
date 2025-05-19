@@ -1,16 +1,18 @@
-import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
+import Repository from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {PrismaClientKnownRequestError, PrismaClientValidationError} from "../../../prisma/generated/runtime/library";
 import {SelectManyHandler} from "../types/selectManyHandler";
 import {getSuccess} from "../../utils/responses/getSuccess";
 import {getError} from "../../utils/responses/getError";
-import {ResponseMessage} from "../../types/responseMessage";
 
 class ScheduleRepository extends Repository {
-  public async GET_ALL() {
+  public async GET_ALL({ skip, take } : {
+    skip?:number,
+    take?:number
+  }) {
     try {
-      const responseData = await prismaClient.schedule.findMany();
       const count = await prismaClient.schedule.count();
+      const responseData = await prismaClient.schedule.findMany({skip: skip || 0, take: take || count});
       return getSuccess({rows: responseData, count});
     }
     catch (e) {
@@ -22,19 +24,19 @@ class ScheduleRepository extends Repository {
       voyage?: boolean,
       train?: boolean,
       stop?: boolean
-    }} & SelectManyHandler): Promise<SuccessResponseData | ErrorResponseData> {
+    }} & SelectManyHandler) {
     try {
       const schedule = await prismaClient.schedule.findMany({ include, skip, take });
       const count = await prismaClient.schedule.count();
 
       if (noremap) {
-        return { data: schedule, count };
+        return getSuccess({ rows: schedule, count });
       }
       const remapped = schedule.map(row => ScheduleRepository.mapToDestructed(row, Object.keys(include)));
-      return { data: remapped, count };
+      return getSuccess({ rows: remapped, count });
     }
     catch (e) {
-      return {error: true, data: e, status: 500}
+      return getError(e as any)
     }
   }
   public async POST_CREATE_ONE(data: {

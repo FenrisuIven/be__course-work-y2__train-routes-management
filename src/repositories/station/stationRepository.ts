@@ -1,4 +1,4 @@
-import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
+import Repository from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {Station, TrainStop} from "@prisma/client";
 import {SelectManyHandler} from "../types/selectManyHandler";
@@ -10,10 +10,13 @@ type StationWithIncludes = Station & {
 }
 
 class StationRepository extends Repository {
-  public async GET_ALL(): Promise<SuccessResponseData | ErrorResponseData> {
+  public async GET_ALL({ skip, take } : {
+    skip?:number,
+    take?:number
+  }) {
     try {
-      const responseData = await prismaClient.station.findMany();
       const count = await prismaClient.station.count();
+      const responseData = await prismaClient.station.findMany({skip: skip || 0, take: take || count});
       return getSuccess({rows: responseData, count});
     }
     catch (e) {
@@ -24,7 +27,7 @@ class StationRepository extends Repository {
   public async GET_ALL_WITH_INCLUDED({include, noremap}: {
     include: {
       stop?: boolean
-    }} & SelectManyHandler): Promise<SuccessResponseData | ErrorResponseData> {
+    }} & SelectManyHandler) {
     const stations = await prismaClient.station.findMany({include})
 
     if (noremap) {

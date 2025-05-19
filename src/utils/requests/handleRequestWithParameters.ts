@@ -22,7 +22,14 @@ const handleRequestWithParameters = <T extends RequestPayload>(callback: (
     }
 
     const noremap = req.query.noremap === "";
-    const responseData = await callback({include, skip: 0, take: 0, noremap, body: req.body} as T);
+    const skip = req.query.skip ? Number(req.query.skip) : 0;
+    const take = req.query.take ? Number(req.query.take) : 0;
+    const responseData = await callback({
+      include,
+      skip: !isNaN(skip) ? skip : 0,
+      take: !isNaN(take) ? take : 0,
+      noremap,
+      body: req.body } as T);
 
     res.status(responseData.status || 200).json(responseData);
   }
