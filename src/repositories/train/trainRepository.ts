@@ -1,9 +1,13 @@
 import prismaClient from "../../setup/orm/prisma";
-import type {Train, Voyage, Tracker, TrainStop} from "@prisma/client";
+import type {Train, Voyage, Tracker} from "@prisma/client";
 
 import {NewTrainRequiredFields, TrainWithTrackerAndVoyage} from "./types";
-import Repository from "../../classes/Repository";
+import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
 import {PrismaClientKnownRequestError} from "../../../prisma/generated/runtime/library";
+import {SelectManyHandler} from "../types/selectManyHandler";
+import {ResponseMessage} from "../../types/responseMessage";
+import {getSuccess} from "../../utils/responses/getSuccess";
+import {getError} from "../../utils/responses/getError";
 
 type TrainWithIncludes = Train & {
   voyage: Voyage | null;
@@ -11,51 +15,66 @@ type TrainWithIncludes = Train & {
 }
 
 class TrainRepository extends Repository{
-  public async GET_ALL(): Promise<Train[]> {
-    return prismaClient.train.findMany();
+  public async GET_ALL(): Promise<SuccessResponseData | ErrorResponseData> {
+    try {
+      const responseData = await prismaClient.train.findMany();
+      const count = await prismaClient.train.count();
+      return { data: responseData, count };
+    }
+    catch (e) {
+      return {error: true, data: e, status: 500}
+    }
   }
-  public async GET_ALL_WITH_INCLUDED({ include, noremap }: {
+  public async GET_ALL_WITH_INCLUDED({ include, noremap, skip, take }: {
     include: {
       voyage?: boolean,
       tracker?: boolean
-    },
-    noremap?: boolean
-  }): Promise<TrainWithIncludes[] | TrainWithTrackerAndVoyage[]> {
-    const trains: TrainWithIncludes[] = await prismaClient.train.findMany({ include });
+    }} & SelectManyHandler
+  ): Promise<SuccessResponseData | ErrorResponseData> {
+    try {
+      const schedule = await prismaClient.train.findMany({ include, skip, take });
+      const count = await prismaClient.train.count();
 
-    if (noremap) {
-      return trains;
+      if (noremap) {
+        return { data: schedule, count };
+      }
+      const remapped = schedule.map(row => TrainRepository.mapToDestructed(row, Object.keys(include)));
+      return { data: remapped, count };
     }
-    return trains.map(row => TrainRepository.mapToDestructed(row, Object.keys(include)));
+    catch (e) {
+      return {error: true, data: e, status: 500}
+    }
   }
 
   public async POST_CREATE_ONE(data: Record<typeof NewTrainRequiredFields[number], any>){
-    let createData: {
-      name: string;
-      active: boolean;
-      tracker: {};
-      voyage?: {};
-    } = {
-      name: data.name,
-      active: Boolean(data.active),
-      tracker: data.trackerSerial && { create: { serial: data.trackerSerial } }
-    };
-
-    const voyageExists = await prismaClient.voyage.findFirst({where: {id: Number(data.voyageID)}});
-    if (voyageExists) {
-      createData = {
-        ...createData,
-        voyage: { connect: { id: Number(data.voyageID) } }
-      };
-    }
-
     try {
-      const row = await prismaClient.train.create({ data: createData });
-      return {status: 200, data: row};
-    } catch (e) {
-      if (e instanceof PrismaClientKnownRequestError) {
-        return {status: 400, data: { code: e.code, message: e.meta?.cause } };
+      let createData: {
+        name: string;
+        active: boolean;
+        tracker: {};
+        voyage?: {};
+      } = {
+        name: data.name,
+        active: Boolean(data.active),
+        tracker: data.trackerSerial && { create: { serial: data.trackerSerial } }
+      };
+
+      const voyageExists = await prismaClient.voyage.findFirst({where: {id: Number(data.voyageID)}});
+      if (voyageExists) {
+        createData = {
+          ...createData,
+          voyage: { connect: { id: Number(data.voyageID) } }
+        };
       }
+      const row = await prismaClient.train.create({ data: createData });
+
+      return getSuccess({row}, 201);
+    }
+    catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        return getError({ code: e.code, message: e.meta?.cause });
+      }
+      return getError(e as any)
     }
   }
 

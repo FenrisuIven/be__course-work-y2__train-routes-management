@@ -1,10 +1,14 @@
+import {ResponseMessage} from "../types/responseMessage";
+
 abstract class Repository {
-  abstract GET_ALL(): Promise<any[]>;
+  abstract GET_ALL(): Promise<ResponseMessage>;
   abstract GET_ALL_WITH_INCLUDED(params: {
-    include: Record<string, boolean>;
+    include?: Record<string, boolean>;
+    skip?: number;
+    take?: number;
     noremap?: boolean;
-  }): Promise<any[]>;
-  abstract POST_CREATE_ONE(data: Record<any, any>): Promise<any>;
+  }): Promise<ResponseMessage>;
+  abstract POST_CREATE_ONE(data: Record<any, any>): Promise<ResponseMessage>;
 }
 
 export default Repository;

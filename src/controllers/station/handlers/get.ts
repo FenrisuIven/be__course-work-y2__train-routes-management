@@ -1,12 +1,11 @@
 import { repositories } from "../../../repositories";
+import {ResponseMessage} from "../../../types/responseMessage";
+import getAll, {GetAllPayload} from "../../handlers/getAll";
 
-const getAll = async (include: Record<string, boolean>, noremap: boolean) => {
-  if (Object.keys(include).length > 0) {
-    return repositories.StationRepository.GET_ALL_WITH_INCLUDED({ include, noremap })
-  }
-  return repositories.StationRepository.GET_ALL();
+const stationGetAll = async (params: GetAllPayload) => {
+  return getAll(params, repositories.StationRepository);
 }
 
 export {
-  getAll
+  stationGetAll
 };

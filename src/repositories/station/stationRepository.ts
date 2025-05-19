@@ -1,30 +1,41 @@
-import Repository from "../../classes/Repository";
+import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {Station, TrainStop} from "@prisma/client";
+import {SelectManyHandler} from "../types/selectManyHandler";
+import {getSuccess} from "../../utils/responses/getSuccess";
+import {getError} from "../../utils/responses/getError";
 
 type StationWithIncludes = Station & {
   stop: TrainStop | null
 }
 
 class StationRepository extends Repository {
-  public async GET_ALL(): Promise<any[]> {
-    return prismaClient.station.findMany();
+  public async GET_ALL(): Promise<SuccessResponseData | ErrorResponseData> {
+    try {
+      const responseData = await prismaClient.station.findMany();
+      const count = await prismaClient.station.count();
+      return getSuccess({rows: responseData, count});
+    }
+    catch (e) {
+      return getError(e as any)
+    }
   }
 
   public async GET_ALL_WITH_INCLUDED({include, noremap}: {
     include: {
       stop?: boolean
-    };
-    noremap?: boolean }
-  ): Promise<any[]> {
-    const stations = await prismaClient.station.findMany({ include })
+    }} & SelectManyHandler): Promise<SuccessResponseData | ErrorResponseData> {
+    const stations = await prismaClient.station.findMany({include})
 
-    if(noremap) { return stations; }
-    return Promise.all(stations.map((
+    if (noremap) {
+      return getSuccess(stations);
+    }
+    const remapped = await Promise.all(stations.map((
         row
       ) =>
-      StationRepository.mapToDestructed(row, Object.keys(include))
+        StationRepository.mapToDestructed(row, Object.keys(include))
     ));
+    return getSuccess(remapped);
   }
 
   public async POST_CREATE_ONE(data: Record<any, any>): Promise<any> {

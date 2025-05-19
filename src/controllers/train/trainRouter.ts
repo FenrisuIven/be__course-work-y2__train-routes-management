@@ -2,13 +2,12 @@ import { Router, Request, Response } from 'express';
 
 import * as trainController from './handlers';
 import resolveRequest from "../../utils/requests/resolveRequest";
-import {handleRequestWithIncludes} from "../../utils/requests/modelRequestHandlers/handleRequestWithIncludes";
-import {handleRequest} from "../../utils/requests/handleRequest";
+import {handleRequestWithParameters} from "../../utils/requests/handleRequestWithParameters";
 
 const trainRouter = Router();
 
-trainRouter.get('/', resolveRequest(handleRequestWithIncludes(trainController.getAll)));
+trainRouter.get('/', resolveRequest(handleRequestWithParameters(trainController.trainGetAll)));
 
-trainRouter.post('/new', resolveRequest(handleRequest(trainController.postNew)))
+trainRouter.post('/new', resolveRequest(handleRequestWithParameters(trainController.postNew)))
 
 export { trainRouter };

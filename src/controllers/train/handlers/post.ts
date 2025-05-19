@@ -1,16 +1,28 @@
-import {Request} from 'express';
-
 import {NewTrainRequiredFields} from "../../../repositories/train/types";
-import {resolveError} from "../../../utils/requests/resolveError";
 import {checkRequiredFieldsPresent} from "../../../utils/validation/isRequiredFieldsPresent";
 import { repositories } from '../../../repositories';
+import {getError} from "../../../utils/responses/getError";
+import {ResponseMessage} from "../../../types/responseMessage";
+import {getSuccess} from "../../../utils/responses/getSuccess";
+import {RequestPayload} from "../../types/requestPayload";
 
-const postNew = (req: Request) => {
-  const missingFields = checkRequiredFieldsPresent(NewTrainRequiredFields, req.body)
-  if (missingFields.length > 0) {
-    return resolveError(400, { msg: `Missing required fields: ${missingFields}` });
+type TrainPostNewPayload = Pick<RequestPayload<Record<typeof NewTrainRequiredFields[number], any>>, "body">
+
+const postNew = async (requestData: TrainPostNewPayload): Promise<ResponseMessage> => {
+  if (!requestData.body){
+    return getError({ msg: 'Request body was not provided' }, 400)
   }
-  return repositories.TrainRepository.POST_CREATE_ONE(req.body);
+
+  const missingFields = checkRequiredFieldsPresent(NewTrainRequiredFields, requestData.body);
+  if (missingFields.length > 0) {
+    return getError({ msg: `Missing required fields: ${missingFields}` }, 400);
+  }
+  const responseData = await repositories.TrainRepository.POST_CREATE_ONE(requestData.body);
+
+  if(responseData.error){
+    return getError(responseData, responseData.status);
+  }
+  return getSuccess(responseData);
 }
 
 export {

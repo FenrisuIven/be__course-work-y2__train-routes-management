@@ -1,33 +1,48 @@
-import Repository from "../../classes/Repository";
+import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {PrismaClientKnownRequestError, PrismaClientValidationError} from "../../../prisma/generated/runtime/library";
-import {resolveError} from "../../utils/requests/resolveError";
-import {resolveSuccess} from "../../utils/requests/resolveSuccess";
+import {SelectManyHandler} from "../types/selectManyHandler";
+import {getSuccess} from "../../utils/responses/getSuccess";
+import {getError} from "../../utils/responses/getError";
+import {ResponseMessage} from "../../types/responseMessage";
 
 class ScheduleRepository extends Repository {
-  public async GET_ALL(): Promise<any[]> {
-    return prismaClient.schedule.findMany();
+  public async GET_ALL() {
+    try {
+      const responseData = await prismaClient.schedule.findMany();
+      const count = await prismaClient.schedule.count();
+      return getSuccess({rows: responseData, count});
+    }
+    catch (e) {
+      return getError(e as any);
+    }
   }
-  public async GET_ALL_WITH_INCLUDED({ include, noremap }: {
+  public async GET_ALL_WITH_INCLUDED({ include, noremap, skip, take }: {
     include: {
       voyage?: boolean,
       train?: boolean,
       stop?: boolean
-    };
-    noremap?: boolean;
-  }): Promise<any[]> {
-    const schedule = await prismaClient.schedule.findMany({ include });
-    if (noremap) {
-      return schedule;
+    }} & SelectManyHandler): Promise<SuccessResponseData | ErrorResponseData> {
+    try {
+      const schedule = await prismaClient.schedule.findMany({ include, skip, take });
+      const count = await prismaClient.schedule.count();
+
+      if (noremap) {
+        return { data: schedule, count };
+      }
+      const remapped = schedule.map(row => ScheduleRepository.mapToDestructed(row, Object.keys(include)));
+      return { data: remapped, count };
     }
-    return schedule.map(row => ScheduleRepository.mapToDestructed(row, Object.keys(include)));
+    catch (e) {
+      return {error: true, data: e, status: 500}
+    }
   }
   public async POST_CREATE_ONE(data: {
     voyageID: number,
     trainID: number,
     stopID: number,
     date: string
-  }): Promise<any> {
+  }) {
     const createData = {
       date: new Date(data.date).toISOString(),
       voyage: { connect: { id: data.voyageID } },
@@ -37,17 +52,17 @@ class ScheduleRepository extends Repository {
 
     try {
       const row = await prismaClient.schedule.create({ data: createData });
-      return resolveSuccess(row, 201);
+      return getSuccess(row, 201);
     }
     catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
-        return resolveError(400, { code: e.code, message: e.meta?.cause });
+        return getError({ code: e.code, message: e.meta?.cause }, 400);
       }
       if (e instanceof PrismaClientValidationError) {
         const messageLines = e.message.trim().split('\n');
-        return resolveError(400, { message: messageLines[messageLines.length - 1] });
+        return getError({ message: messageLines[messageLines.length - 1] }, 400);
       }
-      return resolveError(500, {data: e})
+      return getError({data: e})
     }
   }
 

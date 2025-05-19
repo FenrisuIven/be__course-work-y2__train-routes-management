@@ -1,7 +1,11 @@
 import prismaClient from "../../setup/orm/prisma";
 import type {TrainStop, Station, Route} from "@prisma/client";
-import Repository from "../../classes/Repository";
+import Repository, {ErrorResponseData, SuccessResponseData} from "../../classes/Repository";
 import {TrainStopWithStationAndRoute} from "./types";
+import {getSuccess} from "../../utils/responses/getSuccess";
+import {getError} from "../../utils/responses/getError";
+import {SelectManyHandler} from "../types/selectManyHandler";
+import {ResponseMessage} from "../../types/responseMessage";
 
 type TrainStopWithIncludes = TrainStop & {
   station: Station | null;
@@ -9,24 +13,38 @@ type TrainStopWithIncludes = TrainStop & {
 }
 
 class TrainStopRepository extends Repository{
-  public async GET_ALL(){
-    return prismaClient.trainStop.findMany();
+  public async GET_ALL(): Promise<SuccessResponseData | ErrorResponseData> {
+    try {
+      const responseData = await prismaClient.trainStop.findMany();
+      const count = await prismaClient.trainStop.count();
+      return getSuccess({rows: responseData, count});
+    }
+    catch (e) {
+      return getError(e as any);
+    }
   }
-  public async GET_ALL_WITH_INCLUDED({ include, noremap }: {
+  public async GET_ALL_WITH_INCLUDED({ include, noremap, skip, take }: {
     include: {
       station?: boolean,
       routes?: boolean
-    },
-    noremap?: boolean
-  }): Promise<TrainStopWithIncludes[] | TrainStopWithStationAndRoute[]> {
-    const stops = await prismaClient.trainStop.findMany({ include })
+    }} & SelectManyHandler): Promise<SuccessResponseData | ErrorResponseData> {
+    try {
+      const stops = await prismaClient.trainStop.findMany({ include, skip, take });
+      const count = await prismaClient.trainStop.count();
 
-    if(noremap) { return stops; }
-    return stops.map(row => TrainStopRepository.mapToDestructed(row, Object.keys(include)));
+      if (noremap) {
+        return getSuccess({rows: stops, count });
+      }
+      const remapped = stops.map(row => TrainStopRepository.mapToDestructed(row, Object.keys(include)));
+      return getSuccess({rows: remapped, count});
+    }
+    catch (e) {
+      return getError(e as any)
+    }
   }
 
   public async POST_CREATE_ONE() {
-    throw Error('Independent TrainStop creation is not allowed');
+    return getError({ message: "Independent creation of train stops is not allowed" }, 405)
   }
 
   public static mapToDestructed(targetObject: TrainStopWithIncludes, requested: string[]){
