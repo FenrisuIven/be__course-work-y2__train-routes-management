@@ -1,5 +1,5 @@
 import {NewTrainRequiredFields} from "../../../repositories/train/types";
-import {checkRequiredFieldsPresent} from "../../../utils/validation/isRequiredFieldsPresent";
+import {checkRequiredFieldsPresent} from "../../../utils/validation/checkRequiredFieldsPresent";
 import { repositories } from '../../../repositories';
 import {getError} from "../../../utils/responses/getError";
 import {ResponseMessage} from "../../../types/responseMessage";

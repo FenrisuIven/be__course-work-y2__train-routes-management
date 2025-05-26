@@ -1,6 +1,6 @@
 import Repository from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
-import {PrismaClientKnownRequestError, PrismaClientValidationError} from "../../../prisma/generated/runtime/library";
+import {PrismaClientKnownRequestError, PrismaClientValidationError} from "@prisma/client/runtime/library";
 import {SelectManyHandler} from "../types/selectManyHandler";
 import {getSuccess} from "../../utils/responses/getSuccess";
 import {getError} from "../../utils/responses/getError";

@@ -3,7 +3,7 @@ import type {Train, Voyage, Tracker} from "@prisma/client";
 
 import {NewTrainRequiredFields, TrainWithTrackerAndVoyage} from "./types";
 import Repository from "../../classes/Repository";
-import {PrismaClientKnownRequestError} from "../../../prisma/generated/runtime/library";
+import {PrismaClientKnownRequestError} from "@prisma/client/runtime/library";
 import {SelectManyHandler} from "../types/selectManyHandler";
 import {ResponseMessage} from "../../types/responseMessage";
 import {getSuccess} from "../../utils/responses/getSuccess";
