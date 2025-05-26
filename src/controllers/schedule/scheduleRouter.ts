@@ -7,6 +7,7 @@ import {handleRequestWithParameters} from "../../utils/requests/handleRequestWit
 const scheduleRouter = Router();
 
 scheduleRouter.get('/', resolveRequest(handleRequestWithParameters(scheduleController.scheduleGetAll)));
+scheduleRouter.get('/find', resolveRequest(handleRequestWithParameters(scheduleController.scheduleFind)));
 
 scheduleRouter.post('/new', resolveRequest(handleRequestWithParameters(scheduleController.postNew)))
 

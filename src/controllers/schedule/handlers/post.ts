@@ -1,4 +1,4 @@
-import {checkRequiredFieldsPresent} from "../../../utils/validation/isRequiredFieldsPresent";
+import {checkRequiredFieldsPresent} from "../../../utils/validation/checkRequiredFieldsPresent";
 import {repositories} from '../../../repositories';
 import {NewScheduleRequiredFields} from "../../../repositories/schedule/types";
 import {ResponseMessage} from "../../../types/responseMessage";
