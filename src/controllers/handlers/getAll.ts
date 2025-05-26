@@ -1,5 +1,4 @@
 import {ResponseMessage} from "../../types/responseMessage";
-import {repositories} from "../../repositories";
 import {getError} from "../../utils/responses/getError";
 import {getSuccess} from "../../utils/responses/getSuccess";
 import {RequestPayload} from "../types/requestPayload";
@@ -15,10 +14,12 @@ const getAll = async (params: GetAllPayload, repository: Repository): Promise<Re
     responseData = await repository.GET_ALL(params);
   }
 
-  if ("error" in responseData){
+  if (responseData.error){
     return getError(responseData.data, responseData.status);
   }
-  return getSuccess(responseData.data);
+  else {
+    return getSuccess(responseData.data);
+  }
 }
 
 export default getAll;
