@@ -1,6 +1,10 @@
 import { TrainStop } from "@prisma/client";
 
-export type TrainStopWithStationAndRoute = TrainStop & Station & Routes;
+export type TrainStopWithStationAndRoute = TrainStop & Station & Routes & TrainStopPosition;
+
+type TrainStopPosition = {
+  stopPosition: number[]
+}
 
 type Station = {
   stationName?: string | null;

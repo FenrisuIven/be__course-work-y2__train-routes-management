@@ -32,13 +32,13 @@ class TrainStopRepository extends Repository{
       routes?: boolean
     }} & SelectManyHandler) {
     try {
-      const stops = await prismaClient.trainStop.findMany({ include, skip, take });
       const count = await prismaClient.trainStop.count();
+      const stops = await prismaClient.trainStop.findMany({ include, skip: skip || 0, take: take || count });
 
       if (noremap) {
         return getSuccess({rows: stops, count });
       }
-      const remapped = stops.map(row => TrainStopRepository.mapToDestructed(row, Object.keys(include)));
+      const remapped = await Promise.all(stops.map(row => TrainStopRepository.mapToDestructed(row, Object.keys(include))));
       return getSuccess({rows: remapped, count});
     }
     catch (e) {
@@ -50,20 +50,22 @@ class TrainStopRepository extends Repository{
     return getError({ message: "Independent creation of train stops is not allowed" }, 405)
   }
 
-  public static mapToDestructed(targetObject: TrainStopWithIncludes, requested: string[]){
+  public static async mapToDestructed(targetObject: TrainStopWithIncludes, requested: string[]){
     const { station, routes, ...trainStop } = targetObject;
-    let remappedObj: TrainStopWithStationAndRoute = { ...trainStop };
+    let remappedObj: TrainStop | TrainStopWithStationAndRoute = { ...trainStop };
 
     if (station || requested.includes("station")) {
+      const stationPosition: {coordinates: string}[] = await prismaClient.$queryRaw`WITH p AS (SELECT ST_AsGeoJSON("position") as pos FROM "public"."TrainStop" as t0 WHERE t0."id" = ${trainStop.id}) SELECT "pos"::json->>'coordinates' as coordinates FROM p`;
+      const coordinates = JSON.parse(stationPosition[0]?.coordinates) || null;
       remappedObj = {
         ...remappedObj,
         stationName: station?.name,
         stationCity: station?.city,
         stationRegion: station?.region,
-        stationStreet: station?.street
+        stationStreet: station?.street,
+        stopPosition: coordinates
       }
     }
-
     return remappedObj;
   }
 }
