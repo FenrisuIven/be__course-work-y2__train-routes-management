@@ -1,6 +1,7 @@
 import {ResponseMessage} from "../../types/responseMessage";
+import {RowsDataResponse} from "../../types/RowsDataResponse";
 
-const getSuccess = (data: Record<string, any>, status = 200): ResponseMessage => {
+const getSuccess = <T = never>(data: T extends never ? RowsDataResponse : T, status = 200): ResponseMessage => {
   return {error: false, status, data}
 }
 

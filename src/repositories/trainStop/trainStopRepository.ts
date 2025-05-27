@@ -6,6 +6,7 @@ import {getSuccess} from "../../utils/responses/getSuccess";
 import {getError} from "../../utils/responses/getError";
 import {SelectManyHandler} from "../types/selectManyHandler";
 import {ResponseMessage} from "../../types/responseMessage";
+import {RowsDataResponse} from "../../types/RowsDataResponse";
 
 type TrainStopWithIncludes = TrainStop & {
   station: Station | null;
@@ -36,7 +37,7 @@ class TrainStopRepository extends Repository{
       const stops = await prismaClient.trainStop.findMany({ include, skip: skip || 0, take: take || count });
 
       if (noremap) {
-        return getSuccess({rows: stops, count });
+        return getSuccess({});
       }
       const remapped = await Promise.all(stops.map(row => TrainStopRepository.mapToDestructed(row, Object.keys(include))));
       return getSuccess({rows: remapped, count});
@@ -44,6 +45,17 @@ class TrainStopRepository extends Repository{
     catch (e) {
       return getError(e as any)
     }
+  }
+
+  public async GET_ALL_WITH_POS({skip, take}: SelectManyHandler ){
+    const count = await prismaClient.trainStop.count();
+    const result: {id: number, coordinates: string}[] = await prismaClient.$queryRaw`SELECT t0."id", ST_AsGeoJSON(t0."position") as coordinates FROM "public"."TrainStop" as t0 OFFSET ${skip || 0} LIMIT ${take || count}`;
+    const remapped = result.map((row) => ({
+        id: row.id,
+        geojson: row.coordinates ? JSON.parse(row.coordinates) : []
+      })
+    )
+    return getSuccess({rows: remapped, count});
   }
 
   public async POST_CREATE_ONE() {
