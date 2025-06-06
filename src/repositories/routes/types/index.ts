@@ -1,3 +1,3 @@
-export const NewRoutesRequiredFields = [
-  'name', 'voyageID', 'stops'
-] as const;
+import type {Route} from "@prisma/client";
+
+export type NewRoutesRequiredFields = Required<Omit<Route, 'id'>>

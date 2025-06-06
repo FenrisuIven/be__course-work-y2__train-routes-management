@@ -1,6 +1,8 @@
-import { TrainStop } from "@prisma/client";
+import type { TrainStop } from "@prisma/client";
 
 export type TrainStopWithStationAndRoute = TrainStop & Station & Routes & TrainStopPosition;
+
+export type NewTrainStopRequiredFields = Required<Omit<TrainStop, "id">>;
 
 type TrainStopPosition = {
   stopPosition: number[]
