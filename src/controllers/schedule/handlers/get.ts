@@ -4,7 +4,7 @@ import getAll, {GetAllPayload} from "../../handlers/getAll";
 import {SearchInTablePayload} from "../../handlers/searchInTable";
 import searchInTable from "../../handlers/searchInTable";
 import {checkRequiredFieldsPresent} from "../../../utils/validation/checkRequiredFieldsPresent";
-import {getError} from "../../../utils/responses/getError";
+import {getResponseMessage} from "../../../utils/responses/getResponseMessage";
 
 const scheduleGetAll = async (params: GetAllPayload): Promise<ResponseMessage> => {
   return getAll(params, repositories.ScheduleRepository);
@@ -13,7 +13,7 @@ const scheduleGetAll = async (params: GetAllPayload): Promise<ResponseMessage> =
 const scheduleFind = async (params: SearchInTablePayload) => {
   const isMissingParams = checkRequiredFieldsPresent(["value", "inColumn"], params.search);
   if(isMissingParams.length !== 0) {
-    return getError({message: `Requested query has missing parameters: ${isMissingParams}`, missingParameters: isMissingParams}, 400);
+    return getResponseMessage({message: `Requested query has missing parameters: ${isMissingParams}`, missingParameters: isMissingParams}, 400);
   }
   const targetSearchParams: SearchInTablePayload = {
     search: {

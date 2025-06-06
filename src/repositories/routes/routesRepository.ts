@@ -2,8 +2,7 @@ import Repository from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {PrismaClientKnownRequestError, PrismaClientValidationError} from "@prisma/client/runtime/library";
 import {SelectManyHandler} from "../types/selectManyHandler";
-import {getSuccess} from "../../utils/responses/getSuccess";
-import {getError} from "../../utils/responses/getError";
+import {getResponseMessage} from "../../utils/responses/getResponseMessage";
 
 class RoutesRepository extends Repository {
   public async GET_ALL({ skip, take } : {
@@ -13,10 +12,10 @@ class RoutesRepository extends Repository {
     try {
       const count = await prismaClient.route.count();
       const responseData = await prismaClient.route.findMany({skip: skip || 0, take: take || count});
-      return getSuccess({rows: responseData, count});
+      return getResponseMessage({rows: responseData, count});
     }
     catch (e) {
-      return getError(e as any);
+      return getResponseMessage(e as any, 500);
     }
   }
   public async GET_ALL_WITH_INCLUDED({ include, noremap, skip, take }: {
@@ -29,13 +28,13 @@ class RoutesRepository extends Repository {
       const count = await prismaClient.route.count();
 
       if (noremap) {
-        return getSuccess({ rows: routes, count });
+        return getResponseMessage({ rows: routes, count });
       }
       const remapped = routes.map(row => RoutesRepository.mapToDestructed(row, Object.keys(include)));
-      return getSuccess({ rows: remapped, count });
+      return getResponseMessage({ rows: remapped, count });
     }
     catch (e) {
-      return getError(e as any)
+      return getResponseMessage(e as any, 500)
     }
   }
   public async POST_CREATE_ONE(data: {
@@ -51,17 +50,17 @@ class RoutesRepository extends Repository {
 
     try {
       const row = await prismaClient.route.create({ data: createData });
-      return getSuccess(row, 201);
+      return getResponseMessage(row, 201);
     }
     catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
-        return getError({ code: e.code, message: e.meta?.cause }, 400);
+        return getResponseMessage({ code: e.code, message: e.meta?.cause }, 400);
       }
       if (e instanceof PrismaClientValidationError) {
         const messageLines = e.message.trim().split('\n');
-        return getError({ message: messageLines[messageLines.length - 1] }, 400);
+        return getResponseMessage({ message: messageLines[messageLines.length - 1] }, 400);
       }
-      return getError({data: e})
+      return getResponseMessage({data: e}, 500)
     }
   }
 

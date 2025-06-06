@@ -1,8 +1,7 @@
 import {ResponseMessage} from "../../types/responseMessage";
-import {getError} from "../../utils/responses/getError";
-import {getSuccess} from "../../utils/responses/getSuccess";
 import {RequestPayload} from "../types/requestPayload";
 import Repository from "../../classes/Repository";
+import {getResponseMessage} from "../../utils/responses/getResponseMessage";
 
 export type GetAllPayload = Required<Omit<RequestPayload, "body">>;
 
@@ -15,10 +14,10 @@ const getAll = async (params: GetAllPayload, repository: Repository): Promise<Re
   }
 
   if (responseData.error){
-    return getError(responseData.data, responseData.status);
+    return getResponseMessage(responseData.data, responseData.status);
   }
   else {
-    return getSuccess(responseData.data);
+    return getResponseMessage(responseData.data);
   }
 }
 

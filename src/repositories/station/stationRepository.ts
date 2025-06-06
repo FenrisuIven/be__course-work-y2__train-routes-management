@@ -2,8 +2,7 @@ import Repository from "../../classes/Repository";
 import prismaClient from "../../setup/orm/prisma";
 import {Station, TrainStop} from "@prisma/client";
 import {SelectManyHandler} from "../types/selectManyHandler";
-import {getSuccess} from "../../utils/responses/getSuccess";
-import {getError} from "../../utils/responses/getError";
+import {getResponseMessage} from "../../utils/responses/getResponseMessage";
 
 type StationWithIncludes = Station & {
   stop: TrainStop | null
@@ -17,10 +16,10 @@ class StationRepository extends Repository {
     try {
       const count = await prismaClient.station.count();
       const responseData = await prismaClient.station.findMany({skip: skip || 0, take: take || count});
-      return getSuccess({rows: responseData, count});
+      return getResponseMessage({rows: responseData, count});
     }
     catch (e) {
-      return getError(e as any)
+      return getResponseMessage(e as any, 500)
     }
   }
 
@@ -31,14 +30,14 @@ class StationRepository extends Repository {
     const stations = await prismaClient.station.findMany({include})
 
     if (noremap) {
-      return getSuccess(stations);
+      return getResponseMessage(stations);
     }
     const remapped = await Promise.all(stations.map((
         row
       ) =>
         StationRepository.mapToDestructed(row, Object.keys(include))
     ));
-    return getSuccess(remapped);
+    return getResponseMessage(remapped);
   }
 
   public async POST_CREATE_ONE(data: Record<any, any>): Promise<any> {

@@ -1,6 +1,6 @@
 import prismaClient from "../../setup/orm/prisma";
-import {getSuccess} from "../../utils/responses/getSuccess";
 import {RequestPayload} from "../types/requestPayload";
+import {getResponseMessage} from "../../utils/responses/getResponseMessage";
 
 export type SearchInTablePayload = Required<Omit<RequestPayload, "include" | "noremap" | "body">>
 
@@ -23,7 +23,7 @@ const searchInTable = async({
   const queryResult = await prismaClient.$queryRawUnsafe(query).then(d=>d).catch(e=>e);
   console.log({queryResult});
 
-  return getSuccess(queryResult || []);
+  return getResponseMessage(queryResult || []);
 }
 
 export default searchInTable;
