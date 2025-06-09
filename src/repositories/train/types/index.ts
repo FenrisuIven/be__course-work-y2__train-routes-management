@@ -1,8 +1,7 @@
 import {Train} from "@prisma/client";
 
 export type TrainWithTrackerAndVoyage = Train & Tracker & Voyage;
-export type NewTrainRequiredFields = Required<Omit<Train, "id" >>
-  // 'name', 'voyageID', 'active', 'trackerSerial'
+export const NewTrainRequiredFields = ['name', 'voyageID', 'active', 'trackerSerial'] as const;
 
 type Tracker = {
   trackerSerial?: string | null;

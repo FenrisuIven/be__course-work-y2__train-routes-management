@@ -1,3 +1,1 @@
-import type { Station } from "@prisma/client";
-
-export type NewStationRequiredFields = Required<Omit<Station, "id">>;
+export const NewStationRequiredFields = ['name', 'city', 'region', 'street'] as const;

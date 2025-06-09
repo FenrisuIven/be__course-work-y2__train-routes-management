@@ -13,7 +13,10 @@ app.use(router)
 
 app.listen(3000, () => console.log("Server is listening on: http:\\\\localhost:3000"));
 
-repositories.TrainStopRepository.GET_ALL_WITH_POS({skip: 0, take: 0}).then((d) => console.log(d.rows)).catch(e=>console.log(e));
+type A = {1: string, 2: string};
+console.log(Object.keys({} as A));
+
+repositories.TrainStopRepository.GET_ALL_WITH_POS({skip: 0, take: 0}).then((d) => console.log(d.data.rows)).catch(e=>console.log(e));
 
 const params:Required<Pick<RequestPayload, "search">> = {
   search: {

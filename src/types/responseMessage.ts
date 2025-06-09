@@ -1,5 +1,5 @@
 export type ResponseMessage = {
   error: boolean,
   status?: number,
-  data: Record<string, any>,
+  data: { rows: any[] } & Record<string, any> | Record<string, any>,
 }

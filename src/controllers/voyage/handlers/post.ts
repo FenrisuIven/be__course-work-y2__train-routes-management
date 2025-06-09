@@ -9,10 +9,11 @@ type VoyagePostNewPayload = Pick<RequestPayload<Record<typeof NewVoyageRequiredF
 
 const postNew = async (requestData: VoyagePostNewPayload): Promise<ResponseMessage> => {
   if (!requestData.body){
-    return getResponseMessage({ message: 'Request body was not provided' }, 400)
+    return getResponseMessage({ message: 'Request body was not provided', requiredFields: NewVoyageRequiredFields }, 400)
   }
 
   const missingFields = checkRequiredFieldsPresent(NewVoyageRequiredFields, requestData.body);
+  console.log({NewVoyageRequiredFields})
   if (missingFields.length > 0) {
     return getResponseMessage({ message: `Missing required fields: ${missingFields}` }, 400);
   }

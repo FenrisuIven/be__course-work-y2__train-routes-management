@@ -40,12 +40,12 @@ class RoutesRepository extends Repository {
   public async POST_CREATE_ONE(data: {
     name: string,
     voyageID: number,
-    stops: number[],
+    stopIDs: number[],
   }) {
     const createData = {
       name: data.name,
       voyage: { connect: { id: data.voyageID } },
-      stops: { connect: data.stops.map(stopId=>({ id: stopId })) }
+      stops: { connect: data.stopIDs.map(stopId=>({ id: stopId })) }
     };
 
     try {

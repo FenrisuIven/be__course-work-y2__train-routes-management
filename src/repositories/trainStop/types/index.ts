@@ -2,7 +2,7 @@ import type { TrainStop } from "@prisma/client";
 
 export type TrainStopWithStationAndRoute = TrainStop & Station & Routes & TrainStopPosition;
 
-export type NewTrainStopRequiredFields = Required<Omit<TrainStop, "id">>;
+export const NewTrainStopRequiredFields = ['name', 'stationID', 'position'] as const;
 
 type TrainStopPosition = {
   stopPosition: number[]
