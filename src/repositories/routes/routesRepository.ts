@@ -64,6 +64,57 @@ class RoutesRepository extends Repository {
     }
   }
 
+  public async GET_TRANSFER({ startStopID, endStopID }: {
+    startStopID: number,
+    endStopID: number
+  }) {
+    const routesWithStart = await prismaClient.route.findMany({
+      where: {
+        stops: {
+          some: { id: startStopID }
+        }
+      },
+      include: { stops: true }
+    });
+
+    if (routesWithStart.length < 1) {
+      return getResponseMessage({message: `No routes that contain start stop with ID ${startStopID} were found`}, 404);
+    }
+
+    const routesWithEnd = await prismaClient.route.findMany({
+      where: {
+        stops: {
+          some: { id: endStopID }
+        }
+      },
+      include: { stops: true }
+    });
+
+    if (routesWithEnd.length < 1) {
+      return getResponseMessage({message: `No routes that contain this end stop with ID ${endStopID} were found`}, 404);
+    }
+
+    const possibleTransfers: {routeStart: Object, routeEnd: Object, transferStops: Object[]}[] = [];
+    
+    for (const routeStart of routesWithStart) {
+      for (const routeEnd of routesWithEnd) {
+        const transferStops = routeStart.stops.filter(stopStart =>
+          routeEnd.stops.some(stopEnd => stopEnd.id === stopStart.id)
+        );
+
+        if (transferStops.length > 0) {
+          possibleTransfers.push({
+            routeStart,
+            routeEnd,
+            transferStops,
+          });
+        }
+      }
+    }
+
+    return getResponseMessage({rows: possibleTransfers, count: possibleTransfers.length});
+  }
+
   public static mapToDestructed(targetObject: any, requested: string[]){
     return targetObject;
   }
