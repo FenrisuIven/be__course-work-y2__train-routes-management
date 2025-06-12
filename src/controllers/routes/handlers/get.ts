@@ -6,7 +6,7 @@ import getAll, {GetAllPayload} from "../../handlers/getAll";
 import {getResponseMessage} from "../../../utils/responses/getResponseMessage";
 
 const routesGetAll = async (params: GetAllPayload): Promise<ResponseMessage> => {
-  return getAll(params, repositories.ScheduleRepository);
+  return getAll({...params, include: {stops: true}}, repositories.RoutesRepository);
 }
 
 const routesGetTransfers = async (req: Request): Promise<ResponseMessage> => {

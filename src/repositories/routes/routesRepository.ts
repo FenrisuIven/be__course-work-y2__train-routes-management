@@ -3,6 +3,7 @@ import prismaClient from "../../setup/orm/prisma";
 import {PrismaClientKnownRequestError, PrismaClientValidationError} from "@prisma/client/runtime/library";
 import {SelectManyHandler} from "../types/selectManyHandler";
 import {getResponseMessage} from "../../utils/responses/getResponseMessage";
+import {Route, TrainStop} from "@prisma/client";
 
 class RoutesRepository extends Repository {
   public async GET_ALL({ skip, take } : {
@@ -24,8 +25,8 @@ class RoutesRepository extends Repository {
       stops?: boolean
     }} & SelectManyHandler) {
     try {
-      const routes = await prismaClient.route.findMany({ include, skip, take });
       const count = await prismaClient.route.count();
+      const routes = await prismaClient.route.findMany({ include, skip: skip || 0, take: take || count });
 
       if (noremap) {
         return getResponseMessage({ rows: routes, count });
@@ -74,7 +75,9 @@ class RoutesRepository extends Repository {
           some: { id: startStopID }
         }
       },
-      include: { stops: true }
+      include: {
+        stops: {include: {station: true}}
+      }
     });
 
     if (routesWithStart.length < 1) {
@@ -115,7 +118,7 @@ class RoutesRepository extends Repository {
     return getResponseMessage({rows: possibleTransfers, count: possibleTransfers.length});
   }
 
-  public static mapToDestructed(targetObject: any, requested: string[]){
+  public static mapToDestructed(targetObject: Route & {stops: TrainStop[] | undefined}, requested: string[]){
     return targetObject;
   }
 }
