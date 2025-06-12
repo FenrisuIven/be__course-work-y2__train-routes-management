@@ -41,7 +41,21 @@ class StationRepository extends Repository {
   }
 
   public async POST_CREATE_ONE(data: Record<any, any>): Promise<any> {
-    return Promise.resolve(undefined);
+    if (!data.lon || !data.lat || isNaN(Number(data.lon)) || isNaN(Number(data.lat))) {
+      return getResponseMessage({message: 'Invalid or missing coordinates'}, 400);
+    }
+    const createData = {
+      name: data.name,
+      city: data.city,
+      region: data.region,
+      street: data.street,
+      stop: { create: { name: data.streetName || data.name } }
+    };
+    const res = await prismaClient.station.create({data: createData});
+    // TODO: query new station and then its stop to get the ID
+    // const rawRes = await prismaClient.$queryRaw`UPDATE public."TrainStop" SET "position" = ST_MakePoint(${data.lon}, ${data.lat}) WHERE "id"=${res.id}`
+    // console.log(res.id, {res})
+    return getResponseMessage(res, 201);
   }
 
   public static async mapToDestructed(targetObject: StationWithIncludes, requested: string[]) {

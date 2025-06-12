@@ -8,4 +8,6 @@ const stationRouter = Router();
 
 stationRouter.get('/', resolveRequest(handleRequestWithParameters(stationController.stationGetAll)));
 
+stationRouter.post('/new', resolveRequest(handleRequestWithParameters(stationController.postNew)));
+
 export { stationRouter };
