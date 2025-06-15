@@ -21,7 +21,16 @@ const routesGetTransfers = async (req: Request): Promise<ResponseMessage> => {
   return repositories.RoutesRepository.GET_TRANSFER({ startStopID, endStopID });
 }
 
+const routesGetAllFree = async (): Promise<ResponseMessage> => {
+  return repositories.RoutesRepository.GET_ALL({
+    filter: {
+      where: { voyage: { none: {} } }
+    }
+  });
+}
+
 export {
   routesGetAll,
-  routesGetTransfers
+  routesGetTransfers,
+  routesGetAllFree
 };

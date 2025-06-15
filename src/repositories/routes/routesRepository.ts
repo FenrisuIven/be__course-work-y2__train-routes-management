@@ -6,13 +6,14 @@ import {getResponseMessage} from "../../utils/responses/getResponseMessage";
 import {Route, TrainStop} from "@prisma/client";
 
 class RoutesRepository extends Repository {
-  public async GET_ALL({ skip, take } : {
+  public async GET_ALL({ skip, take, filter } : {
     skip?:number,
-    take?:number
+    take?:number,
+    filter?: { where: Record<string, any> }
   }) {
     try {
       const count = await prismaClient.route.count();
-      const responseData = await prismaClient.route.findMany({skip: skip || 0, take: take || count});
+      const responseData = await prismaClient.route.findMany({skip: skip || 0, take: take || count, ...filter});
       return getResponseMessage({rows: responseData, count});
     }
     catch (e) {

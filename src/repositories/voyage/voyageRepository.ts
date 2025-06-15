@@ -48,10 +48,12 @@ class VoyageRepository extends Repository {
   public async POST_CREATE_ONE(data: {
     name: string
     routeID: number,
+    trainIDs?: number[]
   }) {
     const createData = {
       name: data.name,
-      route: { connect: { id: data.routeID } }
+      route: { connect: { id: data.routeID } },
+      trains: { connect: [...data.trainIDs?.map(trainId => ({ id: trainId })) || []] }
     };
 
     try {
@@ -59,7 +61,9 @@ class VoyageRepository extends Repository {
       return getResponseMessage(row, 201);
     }
     catch (e) {
+      console.log({e})
       if (e instanceof PrismaClientKnownRequestError) {
+        console.log({e})
         return getResponseMessage({ code: e.code, message: e.meta?.cause }, 400);
       }
       if (e instanceof PrismaClientValidationError) {

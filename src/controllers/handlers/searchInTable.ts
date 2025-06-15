@@ -8,9 +8,8 @@ const searchInTable = async({
   search, skip, take
 }: SearchInTablePayload ) => {
   const {value, inTable, inColumn, cmp} = search;
-  console.log({search})
 
-  const baseQuery = (comparison: string) => `SELECT row_to_json(r0) FROM (SELECT * FROM "public"."${inTable}" as t0 WHERE t0."${inColumn}"::text ${comparison}) r0`
+  const baseQuery = (comparison: string) => `SELECT row_to_json(r0) as rowtojson FROM (SELECT * FROM "public"."${inTable}" as t0 WHERE t0."${inColumn}"::text ${comparison}) r0`
 
   const comparison = cmp === "starts" ? `${value}%` : `%${value}`;
   const condition = cmp ? `LIKE '${comparison}'::text` : `= '${value}'`;
@@ -19,11 +18,12 @@ const searchInTable = async({
 
   const query = baseQuery(condition) + ` ${limit} ${offset}`.trim();
 
-  console.log({final: query})
-  const queryResult = await prismaClient.$queryRawUnsafe(query).then(d=>d).catch(e=>e);
-  console.log({queryResult});
+  const queryResult: { rowtojson: Record<string, any> }[] = await prismaClient.$queryRawUnsafe(query)
+    .then((d)=>d)
+    .catch(e=>e);
+  const remapped = queryResult.map(row => ({...row.rowtojson}))
 
-  return getResponseMessage(queryResult || []);
+  return getResponseMessage({rows: remapped || [], count: remapped.length});
 }
 
 export default searchInTable;
