@@ -16,10 +16,10 @@ datasource db {
 model Voyage {
   id      Int     @id @default(autoincrement())
   name    String
-  routeID Int     @unique
+  routeID Int
 
   trains  Train[]
-  route   Route   @relation(fields: [routeID], references: [id])
+  route   Route @relation(fields: [routeID], references: [id])
   schedule Schedule[]
 }
 
@@ -28,7 +28,7 @@ model Route {
   name   String
 
   stops  TrainStop[] @relation("RouteToTrainStop")
-  voyage Voyage?
+  voyage Voyage[]
 }
 
 model TrainStop {
