@@ -12,7 +12,9 @@ trainStopRouter.get('/find', resolveRequest(handleRequestWithParameters(handleSe
 trainStopRouter.get('/', resolveRequest(handleRequestWithParameters(trainStopController.trainStopGetAll)));
 
 trainStopRouter.post('/new', resolveRequest((req,res) => {
-  const responseData = getResponseMessage({message: "TrainStop cannot be created independently, follow to '/station/new' for new Station creation"}, 405)
+  const responseData = getResponseMessage({
+    message: "TrainStop cannot be created independently, follow to '/station/new' for new Station creation"
+  }, 405)
   res.status(405).json(responseData)
 }))
 

@@ -1,1 +1,1 @@
-export const NewRoutesRequiredFields = ['name', 'voyageID', 'stopIDs'] as const;
+export const NewRoutesRequiredFields = ['name', 'stopIDs'] as const;

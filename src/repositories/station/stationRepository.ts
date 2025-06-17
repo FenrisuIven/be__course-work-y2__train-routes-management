@@ -52,10 +52,10 @@ class StationRepository extends Repository {
       stop: { create: { name: data.streetName || data.name } }
     };
     const res = await prismaClient.station.create({data: createData});
-    // TODO: query new station and then its stop to get the ID
-    // const rawRes = await prismaClient.$queryRaw`UPDATE public."TrainStop" SET "position" = ST_MakePoint(${data.lon}, ${data.lat}) WHERE "id"=${res.id}`
-    // console.log(res.id, {res})
-    return getResponseMessage(res, 201);
+    const targetStop = await prismaClient.trainStop.findFirst({where: {stationID: res.id}});
+    if (!targetStop) return getResponseMessage({message: 'Failed to create stop. but the station was created'}, 500);
+    const rawRes = await prismaClient.$queryRaw`UPDATE public."TrainStop" SET "position" = ST_MakePoint(${data.lon}, ${data.lat}) WHERE "id"=${targetStop.id}`
+    return getResponseMessage({res, rawRes}, 201);
   }
 
   public static async mapToDestructed(targetObject: StationWithIncludes, requested: string[]) {

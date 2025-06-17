@@ -9,11 +9,11 @@ class RoutesRepository extends Repository {
   public async GET_ALL({ skip, take, filter } : {
     skip?:number,
     take?:number,
-    filter?: { where: Record<string, any> }
+    filter?: Record<string, any> & { where: Record<string, any> }
   }) {
     try {
       const count = await prismaClient.route.count();
-      const responseData = await prismaClient.route.findMany({skip: skip || 0, take: take || count, ...filter});
+      const responseData = await prismaClient.route.findMany({skip: skip || 0, take: take || count, ...filter,  });
       return getResponseMessage({rows: responseData, count});
     }
     catch (e) {
@@ -32,7 +32,8 @@ class RoutesRepository extends Repository {
       if (noremap) {
         return getResponseMessage({ rows: routes, count });
       }
-      const remapped = routes.map(row => RoutesRepository.mapToDestructed(row, Object.keys(include)));
+      const remapped = routes.map(row =>
+        RoutesRepository.mapToDestructed(row, Object.keys(include)));
       return getResponseMessage({ rows: remapped, count });
     }
     catch (e) {
@@ -41,12 +42,10 @@ class RoutesRepository extends Repository {
   }
   public async POST_CREATE_ONE(data: {
     name: string,
-    voyageID: number,
     stopIDs: number[],
   }) {
     const createData = {
       name: data.name,
-      voyage: { connect: { id: data.voyageID } },
       stops: { connect: data.stopIDs.map(stopId=>({ id: stopId })) }
     };
 
@@ -72,12 +71,10 @@ class RoutesRepository extends Repository {
   }) {
     const routesWithStart = await prismaClient.route.findMany({
       where: {
-        stops: {
-          some: { id: startStopID }
-        }
+        stops: { some: { id: startStopID } }
       },
       include: {
-        stops: {include: {station: true}}
+        stops: { include: { station: true } }
       }
     });
 
@@ -91,7 +88,9 @@ class RoutesRepository extends Repository {
           some: { id: endStopID }
         }
       },
-      include: { stops: true }
+      include: {
+        stops: {include: {station: true}}
+      }
     });
 
     if (routesWithEnd.length < 1) {
@@ -102,8 +101,9 @@ class RoutesRepository extends Repository {
     
     for (const routeStart of routesWithStart) {
       for (const routeEnd of routesWithEnd) {
-        const transferStops = routeStart.stops.filter(stopStart =>
-          routeEnd.stops.some(stopEnd => stopEnd.id === stopStart.id)
+        if (routeStart.id === routeEnd.id) continue;
+        const transferStops = routeStart.stops.filter(stopFromStartRoute =>
+          routeEnd.stops.some(stopFromEndRoute => stopFromEndRoute.id === stopFromStartRoute.id)
         );
 
         if (transferStops.length > 0) {
